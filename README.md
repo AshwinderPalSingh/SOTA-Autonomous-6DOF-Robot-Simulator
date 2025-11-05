@@ -1,55 +1,109 @@
 # SOTA Autonomous Factory Simulator (UR5)
- 
-[License: MIT](https://opensource.org/licenses/MIT)
 
-This MATLAB project is a high-fidelity "Digital Twin" of a state-of-the-art autonomous factory work cell. It simulates a 6-DOF Universal Robots UR5 arm performing a complex, multi-part pick-and-place task.
+This MATLAB project is a high-fidelity "Digital Twin" of a state-of-the-art autonomous factory work cell. It simulates a 6-DOF Universal Robots (UR5) arm performing a complex, multi-part, multi-destination pick-and-place task.
 
-This "super simulation" moves beyond simple animation and models advanced, intelligent robotics concepts, including:
+This "super simulation" moves beyond simple animation and models the advanced, intelligent, and resilient systems found in a modern autonomous factory. It is built on a robust, timer-based animation engine for smooth and reliable visuals.
 
-- **Intelligent Task Planning** (TSP Optimization)
-- **Machine Perception** (Simulated Vision)
-- **Dynamic Collision Avoidance** (Obstacle & Table)
-- **Runtime Fault Recovery** (Grip Failures)
-- **Digital Twin Analytics** (Cycle Time & Energy)
+**Core SOTA concepts modeled:**
+
+- Intelligent Task Planning (TSP Optimization)
+- Machine Perception (Simulated Vision System)
+- Dynamic Collision Avoidance (Obstacle & Table)
+- Runtime Fault Recovery (Grip Failures & Retries)
+- Digital Twin Analytics (Cycle Time & Energy)
+
+  ![Robot Simulator Demo](images/img.png)
 
 
 
-## SOTA (State-of-the-Art) Features
 
-This simulation models a truly "smart" factory:
+## SOTA (State-of-the-Art) Features Explained
 
-- **Autonomous Task Queue**: Spawn multiple parts with randomized pick and place locations. The robot generates a full task queue to process all parts.
+This simulation models a truly "smart" factory by integrating the following systems:
 
-- **TSP Task Optimization**: A "Optimize Task Order" checkbox runs a Traveling Salesperson (TSP) algorithm to find the most efficient, time-saving path to complete the entire job.
+### Autonomous Task Queue
+Spawn multiple parts (1-5) with randomized pick-and-place locations. The simulator generates a full task queue (a list of structs) for the robot to process.
 
-- **Simulated Machine Vision**: A "Run Vision Scan" step is required to "detect" the parts. This simulates a real-world perception system, complete with visual detection boxes and (optional) position noise.
+### TSP Task Optimization
+When the "Optimize Task Order" checkbox is active, the robot runs a Traveling Salesperson (TSP) algorithm (using a greedy Nearest Neighbor approach) to find the most efficient, time-saving path to visit all parts, minimizing total travel distance. You can uncheck this to see the (less efficient) "as-scanned" order.
 
-- **Runtime Fault & Recovery**: A "Grip Failure Chance" slider injects errors. The robot will dynamically detect a failed grip, log the error, and automatically re-plan a "retry" move (up to 3 times) before skipping the part to prevent line stoppage.
+### Simulated Machine Vision
+The robot must first "see" the parts. The "Run Vision Scan" button simulates a perception system, drawing cyan "detection boxes" over the parts. This step intentionally adds small (+/- 2.5mm) noise to the part coordinates, forcing the robot to rely on its sensor-based moves.
 
-- **Dynamic Collision Avoidance**: A central "Safety Obstacle" and the "Table" are registered as collision objects. The robot performs a pre-flight check and will automatically re-route (e.g., move "up and over") to avoid a collision.
+### Runtime Fault & Recovery
+The "Grip Failure Chance" slider injects real-time errors. If a grip fails (based on a random roll), the robot won't just stop. It will dynamically re-plan a "retry" move (move up, move down, grip again). It will attempt this up to 3 times before logging a "CRITICAL FAILURE" and moving on to the next part, preventing a single failure from stopping the entire line.
 
-- **High-Fidelity Animation Engine**: All motion is driven by a single, high-framerate timer (30 FPS) for perfectly smooth, clear, and reliable animations (no pause commands).
+### Dynamic Collision Avoidance
+A central "Safety Obstacle" and the "Table" are registered as collision objects. Before executing any move, the robot performs a pre-flight check. If a direct path would collide (e.g., cut through the obstacle or crash into the table), the log will report "Collision Detected! Rerouting..." and the robot will automatically plan a safe, multi-step path (e.g., move "up and over") to avoid it.
 
-- **Sensor-Based Moves**: The robot simulates a force-torque sensor by performing slow, "sensing" moves for the final pick/place actions, complete with a visual red sensor cone.
+### High-Fidelity Animation Engine
+All motion is driven by a single, high-framerate timer (30 FPS). This "game loop" processes a central queue of command structs. This architecture replaces all pause commands, guaranteeing perfectly smooth, clear, and reliable animations for every action, from robot motion to the smoothly interpolating gripper.
 
-- **Digital Twin Analytics**: After a cycle, the "Performance Analytics" panel displays the Total Cycle Time (sec) and simulated Total Energy Used (kWh), allowing you to quantify the benefits of task optimization.
+### Sensor-Based Moves
+The robot simulates a force-torque sensor by performing slow, "sensing" moves for the final pick/place actions. This is visualized by a red sensor cone appearing from the end-effector, providing clear feedback that the robot is in a high-precision mode.
 
-- **True E-Stop System**: A "EMERGENCY STOP" button will immediately halt any robot motion mid-animation and lock the controls until "Reset" is pressed.
+### Digital Twin Analytics
+After an autonomous cycle, the "Performance Analytics" panel displays the Total Cycle Time (sec) and simulated Total Energy Used (kWh). This allows you to run experiments and quantify the exact time and energy savings of enabling "Task Optimization."
+
+### True E-Stop System
+The "EMERGENCY STOP" button will immediately interrupt any robot motion (even mid-animation) and lock all controls. The simulation remains frozen until the "Reset" button is pressed, mimicking a real-world safety-rated system.
 
 ## Standard Features
 
-- **Full 3-Tab GUI**:
-  - **Factory Control**: Run autonomous cycles.
-  - **Manual Control**: 6 sliders for live joint control.
-  - **Cartesian (IK) Control**: Move the robot by typing in a target (X, Y, Z, Roll, Pitch, Yaw) pose.
+### Full 3-Tab GUI
 
-- **Manual Path Teaching**: A "Manual Programming" tab allows you to save the robot's current pose to a list and "Run Saved Path" to execute the custom sequence.
+- **Factory Control**: Spawn parts, run vision, and start the autonomous cycle.
+- **Manual Control**: 6 sliders for live, timer-based joint control.
+- **Cartesian (IK) Control**: Move the robot by typing in a target (X, Y, Z, Roll, Pitch, Yaw) pose.
 
-- **Live Factory Log**: All actions, plans, sensor readings, and errors are reported to a central log.
+### Manual Path Teaching
+A "Manual Programming" tab allows you to save the robot's current pose to a list. You can then click "Run Saved Path" to have the robot execute your custom, collision-checked sequence.
 
-- **View Controls**: Dedicated buttons to snap the 3D-axis to Isometric (ISO), Top (X-Y), and Side (Y-Z) views.
+### Live Factory Log
+All actions, plans, sensor readings, and errors are reported to a central log with timestamps, giving you a complete trace of the robot's "thoughts" and decisions.
 
-## Project Structure
+### View Controls
+Dedicated buttons to snap the 3D-axis to Isometric (ISO), Top (X-Y), and Side (Y-Z) views.
+```
+.
+│
+├── SOTA_Factory_Simulator.m   (The main app you run)
+│
+├── README.md                  (This file)
+│
+└── functions/               (Folder for all library files)
+    ├── compute_fk.m           (Forward Kinematics: angles -> position)
+    ├── define_ur5_robot.m     (D-H Parameters for UR5)
+    ├── dh_transform.m         (Core D-H function)
+    ├── generate_trajectory.m  (Smooth (Quintic) Trajectory Planner)
+    ├── plotcube.m             (Utility for drawing parts/obstacles)
+    ├── rpy_to_tform.m         (Roll, Pitch, Yaw -> 4x4 Matrix)
+    ├── solve_ur5_ik.m         (Analytical Inverse Kinematics: position -> angles)
+    └── tform_to_rpy.m         (4x4 Matrix -> Roll, Pitch, Yaw)
+```
+## How to Run
 
-  This project is licensed under the MIT License - see the LICENSE file for details (or state the license directly).
+1. Ensure you have MATLAB (R2019b or newer) and (ideally) the Robotics System Toolbox.
+2. Create a folder named `functions/`.
+3. Place all 8 helper files (`compute_fk.m`, `define_ur5_robot.m`, etc.) inside the `functions/` folder.
+4. Place `SOTA_Factory_Simulator.m` in the main folder (one level above `functions/`).
+5. Run `SOTA_Factory_Simulator.m`.
+
+## Recommended Workflow (Autonomous Cycle)
+
+1. Run the `SOTA_Factory_Simulator.m` file.
+2. On the **Factory Control** tab, select the number of parts to spawn (e.g., 4).
+3. Click **"1. Spawn New Parts"**. You will see the parts appear in the yellow "Pick Zone."
+4. Click **"2. Run Vision Scan"**. You will see the "detections" (cyan boxes) appear over the parts.
+5. Check (or uncheck) the **"Optimize Task Order (TSP)"** box.
+6. Set the **"Grip Failure Chance"** slider (e.g., 20% to see it in action).
+7. Click **"3. Run Autonomous Cycle"**.
+8. The controls will lock, and the robot will begin processing the full, optimized queue.
+9. Watch the **Factory Log** to see the robot's "thoughts," including collision checks, grip failures, and retries.
+10. When finished, review the **Performance Analytics** panel to see the total time and energy used.
+
+## License
+
+This project is licensed under the MIT License.
+
 
